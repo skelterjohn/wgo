@@ -22,7 +22,7 @@ import (
 
 const (
 	ConfigDirName = ".gocfg"
-	Debug         = true
+	Debug         = false
 )
 
 func init() {
@@ -52,10 +52,14 @@ func main() {
 		err = initWgo(os.Args[2:])
 	case "clone":
 		err = clone(os.Args[2:])
-	case "vendor":
+	case "restore":
 		w, err := getCurrentWorkspace()
 		orExit(err)
-		w.shellOutToVendor(os.Args)
+		w.shellOutToVendor([]string{"wgo", "vendor", "-r"})
+	case "save":
+		w, err := getCurrentWorkspace()
+		orExit(err)
+		save(w)
 	default:
 		w, err := getCurrentWorkspace()
 		orExit(err)
