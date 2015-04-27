@@ -23,7 +23,21 @@ import (
 	"strings"
 )
 
+func ensureVendor() {
+	var buf bytes.Buffer
+	cmd := exec.Command("vendor")
+	cmd.Stderr = &buf
+	cmd.Run()
+	if !strings.HasPrefix(buf.String(), "Usage: vendor") {
+		fmt.Fprintln(os.Stderr, "The save/restore functionality uses 'vendor'.")
+		fmt.Fprintln(os.Stderr, "To install vendor, 'go get github.com/skelterjohn/vendor'.")
+		os.Exit(1)
+	}
+}
+
 func save(w *workspace) {
+	ensureVendor()
+
 	var buf bytes.Buffer
 	gopath := os.Getenv("GOPATH")
 	newgopath := fmt.Sprintf("%s%c%s", w.root, filepath.ListSeparator, gopath)
@@ -59,4 +73,10 @@ func save(w *workspace) {
 	}
 	w.shellOutToVendor(
 		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
+}
+
+func restore(w *workspace) {
+	ensureVendor()
+
+	w.shellOutToVendor([]string{"wgo", "vendor", "-r"})
 }

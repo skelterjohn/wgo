@@ -55,7 +55,7 @@ func main() {
 	case "restore":
 		w, err := getCurrentWorkspace()
 		orExit(err)
-		w.shellOutToVendor([]string{"wgo", "vendor", "-r"})
+		restore(w)
 	case "save":
 		w, err := getCurrentWorkspace()
 		orExit(err)
