@@ -25,11 +25,16 @@ const (
 	Debug         = false
 )
 
+const usageMessage = `wgo is a tool for managing Go workspaces.
+
+usage: wgo init [ADDITIONAL_GOPATH+]
+       wgo save
+       wgo restore
+       wgo <go command>
+`
+
 func usage() {
-	fmt.Println("usage: wgo init [ADDITIONAL_GOPATH+]")
-	fmt.Println("       wgo save")
-	fmt.Println("       wgo restore")
-	fmt.Println("       wgo <go command>")
+	fmt.Print(usageMessage)
 	os.Exit(1)
 }
 
@@ -52,6 +57,7 @@ func main() {
 	if len(os.Args) == 1 {
 		w, err := getCurrentWorkspace()
 		orExit(err)
+		fmt.Println(usageMessage)
 		w.shellOutToGo(os.Args)
 	}
 	var err error
