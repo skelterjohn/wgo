@@ -36,7 +36,7 @@ And later...
 $ git clone https://foo.git
 $ cd foo
 $ wgo restore
-github.com/someone/dep
+third_party/src/github.com/someone/dep
 $ ls -a
 .gocfg src third_party
 $ wgo install myproj
