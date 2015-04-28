@@ -13,16 +13,18 @@ limitations under the License.
 package main
 
 import (
+	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type workspace struct {
-	root string
+	root    string
+	gopaths []string
 }
 
 func getCurrentWorkspace() (*workspace, error) {
@@ -36,13 +38,18 @@ func getCurrentWorkspace() (*workspace, error) {
 func getWorkspace(start string) (*workspace, error) {
 	goCfgPath := filepath.Join(start, ConfigDirName)
 
-	fi, err := os.Stat(goCfgPath)
-	if err == nil {
-		if fi.IsDir() {
-			return &workspace{
-				root: start,
-			}, nil
+	if fi, err := os.Stat(goCfgPath); err == nil && fi.IsDir() {
+		w := &workspace{
+			root: start,
 		}
+		if cfgFile, err := os.Open(filepath.Join(goCfgPath, "gopaths")); err == nil {
+			sc := bufio.NewScanner(cfgFile)
+			for sc.Scan() {
+				gopath := sc.Text()
+				w.gopaths = append(w.gopaths, strings.TrimSpace(gopath))
+			}
+		}
+		return w, nil
 	}
 
 	if rune(start[len(start)-1]) == filepath.Separator {
@@ -50,16 +57,22 @@ func getWorkspace(start string) (*workspace, error) {
 	}
 	dir, _ := filepath.Split(start)
 	if dir == "" {
-		err = errors.New("no workspace")
-		return nil, err
+		return nil, errors.New("no workspace")
 	}
 
 	return getWorkspace(dir)
 }
 
+func (w *workspace) gopath() string {
+	oldgopath := os.Getenv("GOPATH")
+	newgopath := strings.Join(w.gopaths, string(filepath.ListSeparator))
+	newgopath = strings.Join([]string{newgopath, w.root}, string(filepath.ListSeparator))
+	newgopath = strings.Join([]string{newgopath, oldgopath}, string(filepath.ListSeparator))
+	return newgopath
+}
+
 func (w *workspace) shellOutToGo(args []string) {
-	gopath := os.Getenv("GOPATH")
-	os.Setenv("GOPATH", fmt.Sprintf("%s%c%s", w.root, filepath.ListSeparator, gopath))
+	os.Setenv("GOPATH", w.gopath())
 
 	log.Printf("forking to go: %q", args[1:])
 	cmd := exec.Command("go", args[1:]...)

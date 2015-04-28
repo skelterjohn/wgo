@@ -25,6 +25,14 @@ const (
 	Debug         = false
 )
 
+func usage() {
+	fmt.Println("usage: wgo init [ADDITIONAL_GOPATH+]")
+	fmt.Println("       wgo save")
+	fmt.Println("       wgo restore")
+	fmt.Println("       wgo <go command>")
+	os.Exit(1)
+}
+
 func init() {
 	log.SetFlags(0)
 	if !Debug {
@@ -49,14 +57,20 @@ func main() {
 	var err error
 	switch os.Args[1] {
 	case "init":
-		err = initWgo(os.Args[2:])
-	case "clone":
-		err = clone(os.Args[2:])
+		if err = initWgo(os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "%s\n", err)
+		}
 	case "restore":
+		if len(os.Args) != 2 {
+			usage()
+		}
 		w, err := getCurrentWorkspace()
 		orExit(err)
 		restore(w)
 	case "save":
+		if len(os.Args) != 2 {
+			usage()
+		}
 		w, err := getCurrentWorkspace()
 		orExit(err)
 		save(w)
@@ -65,20 +79,17 @@ func main() {
 		orExit(err)
 		w.shellOutToGo(os.Args)
 	}
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-	}
 }
 
 func initWgo(args []string) error {
-	w, err := getCurrentWorkspace()
-	if err == nil {
-		return fmt.Errorf("%q is already a workspace", w.root)
-	}
-
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
+	}
+
+	w, err := getCurrentWorkspace()
+	if err == nil && w.root != wd {
+		return fmt.Errorf("%q is already a workspace", w.root)
 	}
 
 	fi, err := os.Stat(wd)
@@ -86,13 +97,23 @@ func initWgo(args []string) error {
 		return err
 	}
 
-	err = os.Mkdir(filepath.Join(wd, ConfigDirName), fi.Mode())
-	if err != nil {
+	if err := os.MkdirAll(filepath.Join(wd, ConfigDirName), fi.Mode()); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Join(wd, "src"), fi.Mode()); err != nil {
 		return err
 	}
 
-	// ignore error, src might already be there.
-	_ = os.Mkdir(filepath.Join(wd, "src"), fi.Mode())
+	if fout, err := os.Create(filepath.Join(wd, ConfigDirName, "gopaths")); err != nil {
+		return err
+	} else {
+		for _, gopath := range w.gopaths {
+			fmt.Fprintln(fout, gopath)
+		}
+		for _, gopath := range args {
+			fmt.Fprintln(fout, gopath)
+		}
+	}
 
 	return nil
 }

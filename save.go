@@ -39,16 +39,14 @@ func save(w *workspace) {
 	ensureVendor()
 
 	var buf bytes.Buffer
-	gopath := os.Getenv("GOPATH")
-	newgopath := fmt.Sprintf("%s%c%s", w.root, filepath.ListSeparator, gopath)
-	os.Setenv("GOPATH", newgopath)
+	os.Setenv("GOPATH", w.gopath())
 	cmd := exec.Command("go", "list", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./src/...")
 	cmd.Dir = w.root
 	cmd.Stdout = &buf
 	orExit(cmd.Run())
 
 	goroot := runtime.GOROOT()
-	build.Default.GOPATH = newgopath
+	build.Default.GOPATH = w.gopath()
 
 	pkgs := map[string]string{}
 	for _, pkg := range strings.Split(buf.String(), "\n") {
