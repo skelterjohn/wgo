@@ -56,7 +56,7 @@ A workspace is a directory that contains a directory ".gocfg" at its top level. 
 
 When a wgo command is run from within a workspace, it runs the equivalent go command (by forwarding all arguments) with a modified environment: the GOPATH environment variable is prefixed with the workspace and any other gopaths listed in "W/.gocfg/gopaths".
 
-So, if "W/.gocfg" exists, running wgo from within that workspace is the same as running go with `GOPATH=W:$GOPATH`. That is, the workspace will automatically be in the GOPATH, and have the highest precedence. Giving the highest GOPATH priority to "W" makes it so `go get` puts new packages in "W".
+So, if "W/.gocfg" exists, running wgo from within that workspace is the same as running go with each of the directories listed in "W/.gocfg/gopaths" inserted into the beginning of GOPATH, in order.
 
 You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For instance, if you put third party dependencies in "W/third_party/src", and you want calls to `go get` to put new source in there, make sure "W/third_party" is the first line in "W/.gocfg/gopaths".
 
@@ -70,13 +70,17 @@ There are several new commands introduced to help with management of workspaces.
 
 ###wgo init###
 
-The init command will create a ".gocfg" directory in the current directory. And "src", just to make things clear.
+The init command will create a ".gocfg" directory in the current directory, and ".gocfg/gopaths" within it. And "src", just to make things clear.
+
+Extra arguments after `wgo init` will be extra directories listed in ".gocfg/gopaths". They must be relative paths, and will be interpreted as being relative to the root of the workspace.
 
 If you provide a flag `--set-primary=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
 
 ###wgo save###
 
 The save subcommand will find all revision numbers for all dependencies currently used by any package in the workspace, and write them to ".gocfg/vendor.json".
+
+Since running `wgo save` will print out a list of paths, relative to W, where it will put repositories, it makes sense to put that output into ".gitignore", ".hgignore", or whatever. Eg, `W$ wgo save >> .gitignore` is a nice convenience to make sure the repos are not accidentally included in your workspace repository, if you choose to version it.
 
 ###wgo restore###
 
