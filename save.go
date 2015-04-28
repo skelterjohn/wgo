@@ -40,10 +40,12 @@ func save(w *workspace) {
 
 	var buf bytes.Buffer
 	os.Setenv("GOPATH", w.gopath())
-	cmd := exec.Command("go", "list", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./src/...")
-	cmd.Dir = w.root
-	cmd.Stdout = &buf
-	orExit(cmd.Run())
+	for _, gopath := range w.gopaths {
+		cmd := exec.Command("go", "list", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./"+gopath+"/...")
+		cmd.Dir = w.root
+		cmd.Stdout = &buf
+		orExit(cmd.Run())
+	}
 
 	goroot := runtime.GOROOT()
 	build.Default.GOPATH = w.gopath()
@@ -57,17 +59,33 @@ func save(w *workspace) {
 		if err != nil {
 			continue
 		}
-		if strings.HasPrefix(p.Dir, goroot+"/") {
+		if _, err := filepath.Rel(goroot, p.Dir); err == nil {
 			continue
 		}
 		pkgs[pkg] = p.Dir
 	}
 
-	var addonArgs []string
+	firstGopath := "."
+	if len(w.gopaths) != 0 {
+		firstGopath = w.gopaths[0]
+	}
 
+	addonMapping := map[string]string{}
 	for pkg, dir := range pkgs {
-		addonArgs = append(addonArgs, "-a", filepath.Join("src", pkg)+"="+dir)
+		destination := filepath.Join(firstGopath, "src", pkg)
+		// if it's already in here, vendor will pick it up
+		if !filepath.IsAbs(dir) {
+			continue
+		}
+		if _, err := filepath.Rel(w.root, dir); err == nil {
+			continue
+		}
+		addonMapping[destination] = dir
+	}
 
+	var addonArgs []string
+	for destination, dir := range addonMapping {
+		addonArgs = append(addonArgs, "-a", destination+"="+dir)
 	}
 	w.shellOutToVendor(
 		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
