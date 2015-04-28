@@ -23,7 +23,7 @@ $ mkdir src/myproj
 $ emacs src/myproj/main.go
 ... import "github.com/someone/dep"
 $ wgo install myproj
-$ ./myproj
+$ ./bin/myproj
 it works!
 $ git init
 $ wgo save > .gitignore
@@ -40,7 +40,7 @@ github.com/someone/dep
 $ ls -a
 .gocfg src third_party
 $ wgo install myproj
-$ ./myproj
+$ ./bin/myproj
 it works!
 ```
 
