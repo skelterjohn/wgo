@@ -56,7 +56,7 @@ func getWorkspace(start string) (*workspace, error) {
 		start = start[:len(start)-1]
 	}
 	dir, _ := filepath.Split(start)
-	if dir == "" {
+	if dir == start {
 		return nil, errors.New("no workspace")
 	}
 
