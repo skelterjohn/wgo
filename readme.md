@@ -12,6 +12,38 @@ The wgo tool is a small wrapper around the go tool. It adds the concept of a wor
 - Provide a vendoring approach to dependency management for open source Go programs.
 - Eventually be merged into the go tool itself (ha ha).
 
+###Typical use###
+
+```
+$ mkdir myproject
+$ cd myproject
+$ wgo init --set-primary third_party
+$ wgo get github.com/someone/dep
+$ mkdir src/myproj
+$ emacs src/myproj/main.go
+... import "github.com/someone/dep"
+$ wgo install myproj
+$ ./myproj
+it works!
+$ git init
+$ wgo save > .gitignore
+$ git add .gocfg .gitignore src/myproj
+$ git remote add origin https://foo.git
+$ git push origin
+```
+And later...
+```
+$ git clone https://foo.git
+$ cd foo
+$ wgo restore
+github.com/someone/dep
+$ ls -a
+.gocfg src third_party
+$ wgo install myproj
+$ ./myproj
+it works!
+```
+
 ###How it works###
 
 Workspaces and new subcommands.
