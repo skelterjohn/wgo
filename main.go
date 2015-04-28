@@ -127,20 +127,31 @@ func initWgo(args []string) error {
 	}
 	defer fout.Close()
 
+	checkGopath := func(gopath string) {
+		if filepath.IsAbs(gopath) {
+			fmt.Fprintf(os.Stderr, "%q is not a relative path\n", gopath)
+		}
+	}
+
 	var gopathArgs []string
 	for i := 0; i < len(args); i++ {
 		if args[i] == "--set-primary" {
 			if i+1 >= len(args) {
 				usage()
 			}
+			checkGopath(args[i+1])
 			fmt.Fprintln(fout, args[i+1])
 			i++
 			continue
 		}
+
+		checkGopath(args[i])
+
 		if strings.HasPrefix(args[i], "--set-primary=") {
 			fmt.Fprintln(fout, args[i][len("--set-primary="):])
 			continue
 		}
+
 		gopathArgs = append(gopathArgs, args[i])
 	}
 
