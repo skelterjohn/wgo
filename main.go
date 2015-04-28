@@ -18,6 +18,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -27,7 +28,7 @@ const (
 
 const usageMessage = `wgo is a tool for managing Go workspaces.
 
-usage: wgo init [ADDITIONAL_GOPATH+]
+usage: wgo init [--set-primary=PRIMARY_GOPATH] [ADDITIONAL_GOPATH+]
        wgo save
        wgo restore
        wgo <go command>
@@ -125,10 +126,28 @@ func initWgo(args []string) error {
 		return err
 	}
 	defer fout.Close()
+
+	var gopathArgs []string
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--set-primary" {
+			if i+1 >= len(args) {
+				usage()
+			}
+			fmt.Fprintln(fout, args[i+1])
+			i++
+			continue
+		}
+		if strings.HasPrefix(args[i], "--set-primary=") {
+			fmt.Fprintln(fout, args[i][len("--set-primary="):])
+			continue
+		}
+		gopathArgs = append(gopathArgs, args[i])
+	}
+
 	for _, gopath := range w.gopaths {
 		fmt.Fprintln(fout, gopath)
 	}
-	for _, gopath := range args {
+	for _, gopath := range gopathArgs {
 		fmt.Fprintln(fout, gopath)
 	}
 

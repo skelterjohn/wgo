@@ -40,6 +40,8 @@ There are several new commands introduced to help with management of workspaces.
 
 The init command will create a ".gocfg" directory in the current directory. And "src", just to make things clear.
 
+If you provide a flag `--set-primary=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
+
 ###wgo save###
 
 The save subcommand will find all revision numbers for all dependencies currently used by any package in the workspace, and write them to ".gocfg/vendor.json".
