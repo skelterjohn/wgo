@@ -22,7 +22,7 @@ import (
 
 const (
 	ConfigDirName = ".gocfg"
-	Debug         = true
+	Debug         = false
 )
 
 const usageMessage = `wgo is a tool for managing Go workspaces.
