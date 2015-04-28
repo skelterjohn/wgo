@@ -65,15 +65,19 @@ func getWorkspace(start string) (*workspace, error) {
 
 func (w *workspace) gopath() string {
 	oldgopath := os.Getenv("GOPATH")
-	newgopath := strings.Join(w.gopaths, string(filepath.ListSeparator))
-	newgopath = strings.Join([]string{newgopath, w.root}, string(filepath.ListSeparator))
+	var absGoPaths []string
+	for _, gopath := range w.gopaths {
+		absGoPaths = append(absGoPaths, filepath.Join(w.root, gopath))
+	}
+	newgopath := strings.Join(absGoPaths, string(filepath.ListSeparator))
 	newgopath = strings.Join([]string{newgopath, oldgopath}, string(filepath.ListSeparator))
 	return newgopath
 }
 
 func (w *workspace) shellOutToGo(args []string) {
-	os.Setenv("GOPATH", w.gopath())
-
+	gopath := w.gopath()
+	os.Setenv("GOPATH", gopath)
+	log.Printf("using GOPATH=%s", gopath)
 	log.Printf("forking to go: %q", args[1:])
 	cmd := exec.Command("go", args[1:]...)
 	cmd.Stdin = os.Stdin

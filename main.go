@@ -22,7 +22,7 @@ import (
 
 const (
 	ConfigDirName = ".gocfg"
-	Debug         = false
+	Debug         = true
 )
 
 const usageMessage = `wgo is a tool for managing Go workspaces.
@@ -94,7 +94,7 @@ func initWgo(args []string) error {
 	}
 
 	w, err := getCurrentWorkspace()
-	if err == nil && w.root != wd {
+	if err == nil && (w.root != wd || len(args) == 0) {
 		return fmt.Errorf("%q is already a workspace", w.root)
 	}
 
@@ -110,15 +110,26 @@ func initWgo(args []string) error {
 		return err
 	}
 
-	if fout, err := os.Create(filepath.Join(wd, ConfigDirName, "gopaths")); err != nil {
+	if w, err = getCurrentWorkspace(); err != nil {
 		return err
-	} else {
-		for _, gopath := range w.gopaths {
-			fmt.Fprintln(fout, gopath)
-		}
-		for _, gopath := range args {
-			fmt.Fprintln(fout, gopath)
-		}
+	}
+
+	gopathsPath := filepath.Join(wd, ConfigDirName, "gopaths")
+	// if there is no gopaths yet, stick '.' in there.
+	if _, err := os.Stat(gopathsPath); err != nil {
+		args = append([]string{"."}, args...)
+	}
+
+	var fout *os.File
+	if fout, err = os.Create(gopathsPath); err != nil {
+		return err
+	}
+	defer fout.Close()
+	for _, gopath := range w.gopaths {
+		fmt.Fprintln(fout, gopath)
+	}
+	for _, gopath := range args {
+		fmt.Fprintln(fout, gopath)
 	}
 
 	return nil
