@@ -28,7 +28,7 @@ You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For
 
 ####.gocfg/vendor.json####
 
-The ".gocfg/vendor.json" file will map import paths to repository revisions.
+The ".gocfg/vendor.json" file maps import paths to repository revisions. It is written and used by `vendor`, which can be installed by running `go get github.com/skelterjohn/vendor`.
 
 ##New commands##
 
