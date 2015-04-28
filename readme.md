@@ -42,7 +42,7 @@ The init command will create a ".gocfg" directory in the current directory. And 
 
 ###wgo save###
 
-The stash subcommand will find all revision numbers for all dependencies currently used by any package in the workspace, and write them to ".gocfg/vendor.json".
+The save subcommand will find all revision numbers for all dependencies currently used by any package in the workspace, and write them to ".gocfg/vendor.json".
 
 ###wgo restore###
 
