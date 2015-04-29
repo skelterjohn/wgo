@@ -12,6 +12,16 @@ The wgo tool is a small wrapper around the go tool. It adds the concept of a wor
 - Provide a vendoring approach to dependency management for open source Go programs.
 - Eventually be merged into the go tool itself (ha ha).
 
+####Philosophy?####
+
+`go get` is not a tool to manage dependencies, it is a tool to acquire them. So, trying to cram dependency management underneath `go get` is a fundamental mistake and will only make for awkward source repos and usage.
+
+The approach used by wgo is to go *on top* of the go tool (and `go get`). It manages your entire workspace, and uses the go commands to operate on your workspace.
+
+As a result, github repositories that are made to work with `go get` do not work as wgo workspaces. This incongruency is intentional: `go get` fetches a single piece of your project, while wgo manages the whole thing.
+
+The wgo tool also uses a Go-agnostic tool, vendor (github.com/skelterjohn/vendor), to manage versions of dependencies. There is no reason to restrict vendoring goodness to Go projects.
+
 ####Typical use####
 
 ```
