@@ -4,8 +4,6 @@
 
 The wgo tool is a small wrapper around the go tool. It adds the concept of a workspace, in addition to that of GOPATH, and several new commands to manage that workspace.
 
-*Do not run 'wgo restore' anywhere you care about files - this tool is in alpha and might destroy everything.*
-
 ###Goals###
 
 - Ease unnecessary confusion around how to handle the GOPATH environment variable, especially for new gophers.
