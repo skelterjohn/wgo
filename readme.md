@@ -103,3 +103,5 @@ Since running `wgo save` will print out a list of paths, relative to W, where it
 ###wgo restore###
 
 The restore subcommand will update all repositories in "W/src" to the revision numbers specified in ".gocfg/vendor.json".
+
+*Be wary*: At the moment, `wgo restore` will first remove the directories that are vendored. So, if you have anything in there beyond a checkout of something available from the origin, you're going to have a bad time because it's going to be deleted.
