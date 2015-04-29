@@ -87,6 +87,16 @@ func save(w *workspace) {
 	for destination, dir := range addonMapping {
 		addonArgs = append(addonArgs, "-a", destination+"="+dir)
 	}
+
+	ignoreDirs := []string{".git", ".hg", ".gocfg"}
+	for _, gopath := range w.gopaths {
+		ignoreDirs = append(ignoreDirs,
+			filepath.Join(gopath, "pkg"),
+			filepath.Join(gopath, "bin"))
+	}
+	ignoreDirsStr := strings.Join(ignoreDirs, string(filepath.ListSeparator))
+	os.Setenv("VENDOR_IGNORE_DIRS", ignoreDirsStr)
+
 	w.shellOutToVendor(
 		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
 }
