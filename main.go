@@ -89,6 +89,13 @@ func main() {
 }
 
 func initWgo(args []string) error {
+	for _, arg := range args {
+		if arg != "--set-primary" && strings.HasPrefix(arg, "-") {
+			fmt.Fprintf(os.Stderr, "unrecognized flag: %s\n\n", arg)
+			usage()
+		}
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
