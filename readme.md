@@ -12,7 +12,7 @@ The wgo tool is a small wrapper around the go tool. It adds the concept of a wor
 - Provide a vendoring approach to dependency management for open source Go programs.
 - Eventually be merged into the go tool itself (ha ha).
 
-###Typical use###
+####Typical use####
 
 ```
 $ mkdir myproject
@@ -42,6 +42,24 @@ $ ls -a
 $ wgo install myproj
 $ ./bin/myproj
 it works!
+```
+
+####Take it for a spin####
+
+Repeat after me:
+```
+$ git clone https://github.com/skelterjohn/wgo-example-w
+Cloning into 'wgo-example-w'...
+remote: Counting objects: 12, done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 12 (delta 0), reused 9 (delta 0), pack-reused 0
+Receiving objects: 100% (12/12), done.
+$ cd wgo-example-w/
+wgo-example-w $ wgo restore
+third_party/src/github.com/skelterjohn/wgo-example-dep
+wgo-example-w $ wgo install prog
+wgo-example-w $ ./bin/prog
+bar
 ```
 
 ###How it works###
