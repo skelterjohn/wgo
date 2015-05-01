@@ -26,13 +26,15 @@ const (
 	Debug         = false
 )
 
-const usageMessage = `wgo is a tool for managing Go workspaces.
+const getFlag = "--go-get"
 
-usage: wgo init [--set-primary=PRIMARY_GOPATH] [ADDITIONAL_GOPATH+]
+var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
+
+usage: wgo init [%s=GO_GET_GOPATH] ADDITIONAL_GOPATH*
        wgo save
        wgo restore
        wgo <go command>
-`
+`, getFlag)
 
 func usage() {
 	fmt.Print(usageMessage)
@@ -90,7 +92,7 @@ func main() {
 
 func initWgo(args []string) error {
 	for _, arg := range args {
-		if arg != "--set-primary" && strings.HasPrefix(arg, "-") {
+		if arg != getFlag && strings.HasPrefix(arg, "-") {
 			fmt.Fprintf(os.Stderr, "unrecognized flag: %s\n\n", arg)
 			usage()
 		}
@@ -122,6 +124,10 @@ func initWgo(args []string) error {
 		return err
 	}
 
+	if len(args) == 0 {
+		args = []string{getFlag, "third_party"}
+	}
+
 	gopathsPath := filepath.Join(wd, ConfigDirName, "gopaths")
 	// if there is no gopaths yet, stick '.' in there.
 	if _, err := os.Stat(gopathsPath); err != nil {
@@ -142,7 +148,7 @@ func initWgo(args []string) error {
 
 	var gopathArgs []string
 	for i := 0; i < len(args); i++ {
-		if args[i] == "--set-primary" {
+		if args[i] == getFlag {
 			if i+1 >= len(args) {
 				usage()
 			}
@@ -154,8 +160,8 @@ func initWgo(args []string) error {
 
 		checkGopath(args[i])
 
-		if strings.HasPrefix(args[i], "--set-primary=") {
-			fmt.Fprintln(fout, args[i][len("--set-primary="):])
+		if strings.HasPrefix(args[i], getFlag+"=") {
+			fmt.Fprintln(fout, args[i][len(getFlag+"="):])
 			continue
 		}
 
