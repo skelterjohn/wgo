@@ -59,7 +59,7 @@ func save(w *workspace) {
 		if err != nil {
 			continue
 		}
-		if _, err := filepath.Rel(goroot, p.Dir); err == nil {
+		if x, err := filepath.Rel(goroot, p.Dir); err == nil && !strings.HasPrefix(x, "..") {
 			continue
 		}
 		pkgs[pkg] = p.Dir
@@ -77,7 +77,7 @@ func save(w *workspace) {
 		if !filepath.IsAbs(dir) {
 			continue
 		}
-		if _, err := filepath.Rel(w.root, dir); err == nil {
+		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
 			continue
 		}
 		addonMapping[destination] = dir
