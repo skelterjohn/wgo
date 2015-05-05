@@ -23,8 +23,9 @@ import (
 
 const (
 	ConfigDirName = ".gocfg"
-	Debug         = false
 )
+
+var Debug bool
 
 const getFlag = "--go-get"
 
@@ -43,9 +44,11 @@ func usage() {
 
 func init() {
 	log.SetFlags(0)
+	Debug = os.Getenv("WGO_DEBUG") == "1"
 	if !Debug {
 		log.SetOutput(ioutil.Discard)
 	}
+	log.Println("debug mode on")
 }
 
 func orExit(err error) {
@@ -146,32 +149,49 @@ func initWgo(args []string) error {
 		}
 	}
 
+	goGetDir := ""
+
 	var gopathArgs []string
 	for i := 0; i < len(args); i++ {
 		if args[i] == getFlag {
 			if i+1 >= len(args) {
 				usage()
 			}
-			checkGopath(args[i+1])
-			fmt.Fprintln(fout, args[i+1])
+			goGetDir = args[i+1]
+			checkGopath(goGetDir)
+			fmt.Fprintln(fout, goGetDir)
 			i++
 			continue
 		}
 
-		checkGopath(args[i])
-
 		if strings.HasPrefix(args[i], getFlag+"=") {
-			fmt.Fprintln(fout, args[i][len(getFlag+"="):])
+			goGetDir = args[i][len(getFlag+"="):]
+
+			checkGopath(goGetDir)
+			fmt.Fprintln(fout, goGetDir)
 			continue
 		}
 
+		checkGopath(args[i])
 		gopathArgs = append(gopathArgs, args[i])
 	}
 
+	alreadyListed := map[string]bool{
+		goGetDir: true,
+	}
+
 	for _, gopath := range w.gopaths {
+		if _, ok := alreadyListed[gopath]; ok {
+			continue
+		}
+		alreadyListed[gopath] = true
 		fmt.Fprintln(fout, gopath)
 	}
 	for _, gopath := range gopathArgs {
+		if _, ok := alreadyListed[gopath]; ok {
+			continue
+		}
+		alreadyListed[gopath] = true
 		fmt.Fprintln(fout, gopath)
 	}
 
