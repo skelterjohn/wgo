@@ -41,7 +41,7 @@ func save(w *workspace) {
 	var buf bytes.Buffer
 	os.Setenv("GOPATH", w.gopath())
 	for _, gopath := range w.gopaths {
-		cmd := exec.Command("go", "list", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./"+gopath+"/...")
+		cmd := exec.Command("go", "list", "-e", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./"+gopath+"/...")
 		cmd.Dir = w.root
 		cmd.Stdout = &buf
 		orExit(cmd.Run())
