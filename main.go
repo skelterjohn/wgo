@@ -61,10 +61,8 @@ func orExit(err error) {
 
 func main() {
 	if len(os.Args) == 1 {
-		w, err := getCurrentWorkspace()
-		orExit(err)
 		fmt.Println(usageMessage)
-		w.shellOutToGo(os.Args)
+		shellOutToGo(os.Args)
 	}
 	var err error
 	switch os.Args[1] {

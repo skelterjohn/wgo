@@ -78,6 +78,10 @@ func (w *workspace) shellOutToGo(args []string) {
 	gopath := w.gopath()
 	os.Setenv("GOPATH", gopath)
 	log.Printf("using GOPATH=%s", gopath)
+	shellOutToGo(args)
+}
+
+func shellOutToGo(args []string) {
 	log.Printf("forking to go: %q", args[1:])
 	cmd := exec.Command("go", args[1:]...)
 	cmd.Stdin = os.Stdin
