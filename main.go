@@ -31,7 +31,7 @@ const getFlag = "--go-get"
 
 var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
-usage: wgo init [%s=GO_GET_GOPATH] ADDITIONAL_GOPATH*
+usage: wgo init [%s=GO_GET_GOPATH] [ADDITIONAL_GOPATH+]
        wgo save
        wgo restore
        wgo <go command>
