@@ -25,7 +25,7 @@ The wgo tool also uses a Go-agnostic tool, vendor (github.com/skelterjohn/vendor
 ```
 $ mkdir myproject
 $ cd myproject
-$ wgo init --set-primary third_party
+$ wgo init --go-get third_party
 $ wgo get github.com/someone/dep
 $ mkdir src/myproj
 $ emacs src/myproj/main.go
@@ -100,7 +100,7 @@ The init command will create a ".gocfg" directory in the current directory, and 
 
 Extra arguments after `wgo init` will be extra directories listed in ".gocfg/gopaths". They must be relative paths, and will be interpreted as being relative to the root of the workspace.
 
-If you provide a flag `--set-primary=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
+If you provide a flag `--go-get=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
 
 ###wgo save###
 
