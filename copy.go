@@ -13,7 +13,7 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
+	//	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -31,8 +31,8 @@ func copyDir(src, dst string) {
 		dstPath := filepath.Join(dst, relPath)
 		finfo, err := os.Stat(path)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
-			return err
+			//fmt.Fprintf(os.Stderr, "%s: %v\n", path, err)
+			return nil
 		}
 		if finfo.IsDir() {
 			return os.MkdirAll(dstPath, finfo.Mode())

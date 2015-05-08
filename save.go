@@ -36,17 +36,30 @@ func ensureVendor() {
 }
 
 func (w *workspace) getOutsidePackages() map[string]string {
-	var buf bytes.Buffer
 	os.Setenv("GOPATH", w.gopath())
 	var targets []string
 	for _, gopath := range w.gopaths {
 		target := "./" + gopath + "/src/..." // filepath.Join() doesn't like a leading dot.
 		targets = append(targets, target)
 	}
+
+	goListTestArgs := []string{"list", "-e", "-f", "{{range .TestImports}}{{.}}\n{{end}}"}
+	goListTestArgs = append(goListTestArgs, targets...)
+	// fmt.Printf("%q\n", goListTestArgs)
+	var testBuf bytes.Buffer
+	cmd := exec.Command("go", goListTestArgs...)
+	cmd.Dir = w.root
+	cmd.Stdout = &testBuf
+	orExit(cmd.Run())
+	for _, pkg := range strings.Split(testBuf.String(), "\n") {
+		targets = append(targets, pkg)
+	}
+
 	goListArgs := []string{"list", "-e", "-f", "{{range .Deps}}{{.}}\n{{end}}"}
 	goListArgs = append(goListArgs, targets...)
 	// fmt.Printf("%q\n", goListArgs)
-	cmd := exec.Command("go", goListArgs...)
+	var buf bytes.Buffer
+	cmd = exec.Command("go", goListArgs...)
 	cmd.Dir = w.root
 	cmd.Stdout = &buf
 	orExit(cmd.Run())
@@ -141,7 +154,6 @@ func importPkgs(w *workspace) {
 			continue
 		}
 		if _, err := os.Stat(destination); err == nil {
-			fmt.Fprintf(os.Stderr, "can't copy in %q, destination is occupied\n", pkg)
 			continue
 		}
 		fmt.Println(pkg)
