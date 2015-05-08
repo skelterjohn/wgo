@@ -32,9 +32,11 @@ const getFlag = "--go-get"
 var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
 usage: wgo init [%s=GO_GET_GOPATH] [ADDITIONAL_GOPATH+]
+       wgo import
        wgo save
        wgo restore
-       wgo <go command>
+
+       wgo <go command>  # run a go command with the workspace's gopaths
 `, getFlag)
 
 func usage() {
@@ -70,6 +72,13 @@ func main() {
 		if err = initWgo(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
+	case "import":
+		if len(os.Args) != 2 {
+			usage()
+		}
+		w, err := getCurrentWorkspace()
+		orExit(err)
+		importPkgs(w)
 	case "restore":
 		if len(os.Args) != 2 {
 			usage()

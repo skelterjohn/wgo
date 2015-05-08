@@ -35,17 +35,21 @@ func ensureVendor() {
 	}
 }
 
-func save(w *workspace) {
-	ensureVendor()
-
+func (w *workspace) getOutsidePackages() map[string]string {
 	var buf bytes.Buffer
 	os.Setenv("GOPATH", w.gopath())
+	var targets []string
 	for _, gopath := range w.gopaths {
-		cmd := exec.Command("go", "list", "-e", "-f", "{{range .Deps}}{{.}}\n{{end}}", "./"+gopath+"/...")
-		cmd.Dir = w.root
-		cmd.Stdout = &buf
-		orExit(cmd.Run())
+		target := "./" + gopath + "/src/..." // filepath.Join() doesn't like a leading dot.
+		targets = append(targets, target)
 	}
+	goListArgs := []string{"list", "-e", "-f", "{{range .Deps}}{{.}}\n{{end}}"}
+	goListArgs = append(goListArgs, targets...)
+	// fmt.Printf("%q\n", goListArgs)
+	cmd := exec.Command("go", goListArgs...)
+	cmd.Dir = w.root
+	cmd.Stdout = &buf
+	orExit(cmd.Run())
 
 	goroot := runtime.GOROOT()
 	build.Default.GOPATH = w.gopath()
@@ -64,6 +68,24 @@ func save(w *workspace) {
 		}
 		pkgs[pkg] = p.Dir
 	}
+
+	for pkg, dir := range pkgs {
+		if !filepath.IsAbs(dir) {
+			continue
+		}
+		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
+			continue
+		}
+		pkgs[pkg] = dir
+	}
+
+	return pkgs
+}
+
+func save(w *workspace) {
+	ensureVendor()
+
+	pkgs := w.getOutsidePackages()
 
 	firstGopath := "."
 	if len(w.gopaths) != 0 {
@@ -99,6 +121,32 @@ func save(w *workspace) {
 
 	w.shellOutToVendor(
 		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
+}
+
+func importPkgs(w *workspace) {
+	pkgs := w.getOutsidePackages()
+
+	firstGopath := "."
+	if len(w.gopaths) != 0 {
+		firstGopath = w.gopaths[0]
+	}
+
+	for pkg, dir := range pkgs {
+		destination := filepath.Join(firstGopath, "src", pkg)
+		// if it's already in here, vendor will pick it up
+		if !filepath.IsAbs(dir) {
+			continue
+		}
+		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
+			continue
+		}
+		if _, err := os.Stat(destination); err == nil {
+			fmt.Fprintf(os.Stderr, "can't copy in %q, destination is occupied\n", pkg)
+			continue
+		}
+		fmt.Println(pkg)
+		copyDir(dir, destination)
+	}
 }
 
 func restore(w *workspace) {
