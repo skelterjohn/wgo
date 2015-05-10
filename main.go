@@ -10,6 +10,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+/*
+The wgo tool is a small wrapper around the go tool. It adds the concept
+of a workspace, in addition to that of GOPATH, and several new commands
+to manage that workspace.
+*/
 package main
 
 import (
