@@ -25,8 +25,10 @@ The wgo tool also uses a Go-agnostic tool, vendor (github.com/skelterjohn/vendor
 ```
 $ mkdir myproject
 $ cd myproject
-$ wgo init --go-get third_party
+$ wgo init
 $ wgo get github.com/someone/dep
+$ ls -a
+.gocfg src vendor
 $ mkdir src/myproj
 $ emacs src/myproj/main.go
 ... import "github.com/someone/dep"
@@ -44,9 +46,9 @@ And later...
 $ git clone https://foo.git
 $ cd foo
 $ wgo restore
-third_party/src/github.com/someone/dep
+vendor/src/github.com/someone/dep
 $ ls -a
-.gocfg src third_party
+.gocfg src vendor
 $ wgo install myproj
 $ ./bin/myproj
 it works!
@@ -64,7 +66,7 @@ remote: Total 12 (delta 0), reused 9 (delta 0), pack-reused 0
 Receiving objects: 100% (12/12), done.
 $ cd wgo-example-w/
 wgo-example-w $ wgo restore
-third_party/src/github.com/skelterjohn/wgo-example-dep
+vendor/src/github.com/skelterjohn/wgo-example-dep
 wgo-example-w $ wgo install prog
 wgo-example-w $ ./bin/prog
 bar
@@ -84,7 +86,7 @@ When a wgo command is run from within a workspace, it runs the equivalent go com
 
 So, if "W/.gocfg" exists, running wgo from within that workspace is the same as running go with each of the directories listed in "W/.gocfg/gopaths" inserted into the beginning of GOPATH, in order.
 
-You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For instance, if you put third party dependencies in "W/third_party/src", and you want calls to `go get` to put new source in there, make sure "W/third_party" is the first line in "W/.gocfg/gopaths".
+You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For instance, if you put third party dependencies in "W/vendor/src", and you want calls to `go get` to put new source in there, make sure "W/vendor" is the first line in "W/.gocfg/gopaths" (this is the default when you run `wgo init` with no additional arguments).
 
 ####.gocfg/vendor.json####
 
@@ -100,7 +102,7 @@ The init command will create a ".gocfg" directory in the current directory, and 
 
 Extra arguments after `wgo init` will be extra directories listed in ".gocfg/gopaths". They must be relative paths, and will be interpreted as being relative to the root of the workspace.
 
-If you provide a flag `--go-get=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
+If you provide a flag `--vendor-gopath=DIR`, then "DIR" will be the first directory listed in ".gocfg/gopaths". Being listed first means that it will be where `go get` puts new packages, and where `wgo save` will use as a default location for packages currently outside of "W".
 
 ###wgo save###
 

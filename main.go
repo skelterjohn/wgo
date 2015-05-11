@@ -33,11 +33,11 @@ const (
 
 var Debug bool
 
-const getFlag = "--go-get"
+const getFlag = "--vendor-gopath"
 
 var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
-usage: wgo init [%s=GO_GET_GOPATH] [ADDITIONAL_GOPATH+]
+usage: wgo init [%s=VENDOR_GOPATH] [ADDITIONAL_GOPATH+]
        wgo import
        wgo save
        wgo restore
@@ -141,7 +141,7 @@ func initWgo(args []string) error {
 	}
 
 	if len(args) == 0 {
-		args = []string{getFlag, "third_party"}
+		args = []string{getFlag, "vendor"}
 	}
 
 	gopathsPath := filepath.Join(wd, ConfigDirName, "gopaths")
