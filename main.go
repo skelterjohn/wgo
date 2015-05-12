@@ -120,7 +120,7 @@ func initWgo(args []string) error {
 	}
 
 	w, err := getCurrentWorkspace()
-	if err == nil && (w.root != wd || len(args) == 0) {
+	if err == nil && (w.root == wd && len(args) == 0) {
 		return fmt.Errorf("%q is already a workspace", w.root)
 	}
 
