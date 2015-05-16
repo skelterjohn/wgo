@@ -36,9 +36,9 @@ func ensureVendor() {
 	}
 }
 
-func (w *workspace) getOutsidePackages() map[string]string {
+func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	os.Setenv("GOPATH", w.gopath())
-	var targets []string
+
 	for _, gopath := range w.gopaths {
 		target := "./" + gopath + "/src/..." // filepath.Join() doesn't like a leading dot.
 		targets = append(targets, target)
@@ -56,7 +56,7 @@ func (w *workspace) getOutsidePackages() map[string]string {
 		targets = append(targets, pkg)
 	}
 
-	goListArgs := []string{"list", "-e", "-f", "{{range .Deps}}{{.}}\n{{end}}"}
+	goListArgs := []string{"list", "-e", "-f", "{{.ImportPath}}\n{{range .Deps}}{{.}}\n{{end}}"}
 	goListArgs = append(goListArgs, targets...)
 	// fmt.Printf("%q\n", goListArgs)
 	var buf bytes.Buffer
@@ -96,10 +96,10 @@ func (w *workspace) getOutsidePackages() map[string]string {
 	return pkgs
 }
 
-func save(w *workspace) {
+func save(w *workspace, targets []string) {
 	ensureVendor()
 
-	pkgs := w.getOutsidePackages()
+	pkgs := w.getOutsidePackages(targets)
 
 	firstGopath := "."
 	if len(w.gopaths) != 0 {
@@ -137,8 +137,8 @@ func save(w *workspace) {
 		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
 }
 
-func importPkgs(w *workspace) {
-	pkgs := w.getOutsidePackages()
+func vendor(w *workspace, targets []string) {
+	pkgs := w.getOutsidePackages(targets)
 
 	firstGopath := "."
 	if len(w.gopaths) != 0 {

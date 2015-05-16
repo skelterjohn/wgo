@@ -114,5 +114,5 @@ Since running `wgo save` will print out a list of paths, relative to W, where it
 
 The restore subcommand will update all repositories in "W/src" to the revision numbers specified in ".gocfg/vendor.json".
 
-###wgo import###
-The import subcommand will find all Go dependencies that are outside of the workspace and copy them into the workspace. Useful if you intend to completely vendor a workspace.
+###wgo vendor###
+The vendor subcommand will find all Go dependencies that are outside of the workspace and copy them into the workspace. Useful if you intend to completely vendor a workspace.

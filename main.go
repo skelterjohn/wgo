@@ -39,8 +39,8 @@ var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
 usage: wgo init [%s=VENDOR_GOPATH] [ADDITIONAL_GOPATH+]
        wgo import
-       wgo save
-       wgo restore
+       wgo save [PACKAGE+]
+       wgo vendor [PACKAGE+]
 
        wgo <go command>  # run a go command with the workspace's gopaths
 `, getFlag)
@@ -78,13 +78,10 @@ func main() {
 		if err = initWgo(os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "%s\n", err)
 		}
-	case "import":
-		if len(os.Args) != 2 {
-			usage()
-		}
+	case "vendor":
 		w, err := getCurrentWorkspace()
 		orExit(err)
-		importPkgs(w)
+		vendor(w, os.Args[2:])
 	case "restore":
 		if len(os.Args) != 2 {
 			usage()
@@ -93,12 +90,9 @@ func main() {
 		orExit(err)
 		restore(w)
 	case "save":
-		if len(os.Args) != 2 {
-			usage()
-		}
 		w, err := getCurrentWorkspace()
 		orExit(err)
-		save(w)
+		save(w, os.Args[2:])
 	default:
 		w, err := getCurrentWorkspace()
 		orExit(err)
