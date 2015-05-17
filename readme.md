@@ -15,6 +15,8 @@ wgo is not at all like https://github.com/tools/godep (see "Philosophy", below).
 wgo is very much like https://github.com/constabulary/gb except for some key details.
 - gb reimplements all of the build mechanics, where wgo uses the existing go tool.
 - gb works only from the root of the workspace by recognizing a "src" directory, where wgo adds an additional "W/.gocfg" directory and will search directory parents to find the workspace (like git or mercurial do with ".git" or ".hg" directories). As a result, gb can use wgo workspaces, but not the other way around without first running `wgo init` in the workspace root.
+- wgo has the save/restore functionality built in, where gb can potentially include them as plugins.
+- Both wgo and gb make it easy for you to create a single workspace that has everything you need for your project, and therefore make it easy to put your entire project in version control in a way that is easy for others to access.
 
 ###Goals###
 
