@@ -98,6 +98,8 @@ A workspace is a directory that contains a directory ".gocfg" at its top level. 
 
 When a wgo command is run from within a workspace, it runs the equivalent go command (by forwarding all arguments) with a modified environment: the GOPATH environment variable is prefixed with the workspace and any other gopaths listed in "W/.gocfg/gopaths".
 
+For `wgo get`, the GOPATH used will only be taken from "W/.gocfg/gopaths". For any other go tool command, the GOPATH will also have the value taken from wgo's environment.
+
 So, if "W/.gocfg" exists, running wgo from within that workspace is the same as running go with each of the directories listed in "W/.gocfg/gopaths" inserted into the beginning of GOPATH, in order.
 
 You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For instance, if you put third party dependencies in "W/vendor/src", and you want calls to `go get` to put new source in there, make sure "W/vendor" is the first line in "W/.gocfg/gopaths" (this is the default when you run `wgo init` with no additional arguments).
