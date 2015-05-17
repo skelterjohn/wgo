@@ -4,6 +4,18 @@
 
 The wgo tool is a small wrapper around the go tool. It adds the concept of a workspace, in addition to that of GOPATH, and several new commands to manage that workspace.
 
+###How is this like...###
+
+####godep####
+
+wgo is not at all like https://github.com/tools/godep (see "Philosophy", below). However, the `wgo save --godeps` command (see "wgo save", below) makes it easy to migrate from godep to wgo.
+
+####gb####
+
+wgo is very much like https://github.com/constabulary/gb except for some key details.
+- gb reimplements all of the build mechanics, where wgo uses the existing go tool.
+- gb works only from the root of the workspace by recognizing a "src" directory, where wgo adds an additional "W/.gocfg" directory and will search directory parents to find the workspace (like git or mercurial do with ".git" or ".hg" directories). As a result, gb can use wgo workspaces, but not the other way around without first running `wgo init` in the workspace root.
+
 ###Goals###
 
 - Ease unnecessary confusion around how to handle the GOPATH environment variable, especially for new gophers.
