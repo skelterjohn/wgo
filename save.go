@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Google Inc. All rights reserved.
+Copyright 2015 Google Inc. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -32,6 +33,22 @@ func ensureVendor() {
 	if !strings.HasPrefix(buf.String(), "Usage: vendor") {
 		fmt.Fprintln(os.Stderr, "The save/restore functionality uses 'vendor'.")
 		fmt.Fprintln(os.Stderr, "To install vendor, 'go get github.com/skelterjohn/vendor'.")
+		os.Exit(1)
+	}
+	cmd = exec.Command("vendor", "-v")
+	buf = bytes.Buffer{}
+	cmd.Stdout = &buf
+	cmd.Run()
+	if !strings.HasPrefix(buf.String(), "vendor build ") {
+		fmt.Fprintln(os.Stderr, "Your copy of vendor is out of date.")
+		fmt.Fprintln(os.Stderr, "To update vendor, 'go get -u github.com/skelterjohn/vendor'.")
+		os.Exit(1)
+	}
+	tokens := strings.Split(buf.String(), " ")
+	numToken := strings.TrimSpace(tokens[2])
+	if buildNum, err := strconv.Atoi(numToken); err != nil || buildNum < 3 {
+		fmt.Fprintln(os.Stderr, "Your copy of vendor is out of date.")
+		fmt.Fprintln(os.Stderr, "To update vendor, 'go get -u github.com/skelterjohn/vendor'.")
 		os.Exit(1)
 	}
 }
@@ -96,19 +113,24 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	return pkgs
 }
 
-func save(w *workspace, targets []string) {
+func save(w *workspace, args []string) {
 	ensureVendor()
+
+	var targets []string
+	godeps := false
+	for _, t := range args {
+		if t == "--godeps" {
+			godeps = true
+		} else {
+			targets = append(targets, t)
+		}
+	}
 
 	pkgs := w.getOutsidePackages(targets)
 
-	firstGopath := "."
-	if len(w.gopaths) != 0 {
-		firstGopath = w.gopaths[0]
-	}
-
 	addonMapping := map[string]string{}
 	for pkg, dir := range pkgs {
-		destination := filepath.Join(firstGopath, "src", pkg)
+		destination := filepath.Join(w.vendorRootSrc(), pkg)
 		// if it's already in here, vendor will pick it up
 		if !filepath.IsAbs(dir) {
 			continue
@@ -124,6 +146,13 @@ func save(w *workspace, targets []string) {
 		addonArgs = append(addonArgs, "-a", destination+"="+dir)
 	}
 
+	if godeps {
+		for _, dd := range w.importGodeps() {
+			rarg := dd.root + "=" + dd.repo + "@" + dd.rev
+			addonArgs = append(addonArgs, "-r"+dd.kind, rarg)
+		}
+	}
+
 	ignoreDirs := []string{".git", ".hg", ".gocfg"}
 	for _, gopath := range w.gopaths {
 		ignoreDirs = append(ignoreDirs,
@@ -134,7 +163,7 @@ func save(w *workspace, targets []string) {
 	os.Setenv("VENDOR_IGNORE_DIRS", ignoreDirsStr)
 
 	w.shellOutToVendor(
-		append([]string{"wgo", "vendor", "-s"}, addonArgs...))
+		append([]string{"wgo", "vendor", "-x", "-s"}, addonArgs...))
 }
 
 func vendor(w *workspace, targets []string) {
