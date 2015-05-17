@@ -39,7 +39,7 @@ var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
 usage: wgo init [%s=VENDOR_GOPATH] [ADDITIONAL_GOPATH+]
        wgo import
-       wgo save [PACKAGE+]
+       wgo save [--godeps] [PACKAGE+]
        wgo vendor [PACKAGE+]
 
        wgo <go command>  # run a go command with the workspace's gopaths

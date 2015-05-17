@@ -110,6 +110,16 @@ The save subcommand will find all revision numbers for all dependencies currentl
 
 Since running `wgo save` will print out a list of paths, relative to W, where it will put repositories, it makes sense to put that output into ".gitignore", ".hgignore", or whatever. Eg, `W$ wgo save >> .gitignore` is a nice convenience to make sure the repos are not accidentally included in your workspace repository, if you choose to version it.
 
+Adding the `--godeps` flag after `wgo save` will cause wgo to collect revision pins from all "Godeps/Godeps.json" files it finds in the workspace, and bring them into ".gocfg/vendor.json".
+
+As a result, a way to transform a godep-managed package into a wgo workspace is to run
+```
+W$ wgo init
+W$ wgo get <package managed by godep>
+W$ wgo save --godeps
+W$ wgo restore
+```
+
 ###wgo restore###
 
 The restore subcommand will update all repositories in "W/src" to the revision numbers specified in ".gocfg/vendor.json".

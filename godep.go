@@ -74,7 +74,7 @@ func (w *workspace) mergeGodeps(dirGs map[string]Godeps) map[string]dirDep {
 		for _, dep := range g.Deps {
 			repoRoot, err := vcs.RepoRootForImportPath(dep.ImportPath, false)
 			if err != nil {
-				fmt.Fprint(os.Stderr, "for %q: %s\n", dep.ImportPath, err)
+				fmt.Fprintf(os.Stderr, "for %q: %s\n", dep.ImportPath, err)
 				continue
 			}
 			dd := dirDep{

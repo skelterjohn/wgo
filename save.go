@@ -54,7 +54,7 @@ func ensureVendor() {
 }
 
 func (w *workspace) getOutsidePackages(targets []string) map[string]string {
-	os.Setenv("GOPATH", w.gopath())
+	os.Setenv("GOPATH", w.gopath(true))
 
 	for _, gopath := range w.gopaths {
 		target := "./" + gopath + "/src/..." // filepath.Join() doesn't like a leading dot.
@@ -83,7 +83,7 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	orExit(cmd.Run())
 
 	goroot := runtime.GOROOT()
-	build.Default.GOPATH = w.gopath()
+	build.Default.GOPATH = w.gopath(true)
 
 	pkgs := map[string]string{}
 	for _, pkg := range strings.Split(buf.String(), "\n") {

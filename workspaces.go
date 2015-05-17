@@ -64,8 +64,11 @@ func getWorkspace(start string) (*workspace, error) {
 	return getWorkspace(dir)
 }
 
-func (w *workspace) gopath() string {
-	oldgopath := os.Getenv("GOPATH")
+func (w *workspace) gopath(external bool) string {
+	var oldgopath string
+	if external {
+		oldgopath = os.Getenv("GOPATH")
+	}
 	var absGoPaths []string
 	for _, gopath := range w.gopaths {
 		absGoPaths = append(absGoPaths, filepath.Join(w.root, gopath))
@@ -75,8 +78,16 @@ func (w *workspace) gopath() string {
 	return newgopath
 }
 
+func guessGoCommand(args []string) string {
+	if len(args) < 1 {
+		return ""
+	}
+	return args[1]
+}
+
 func (w *workspace) shellOutToGo(args []string) {
-	gopath := w.gopath()
+	// we want to fetch new code directly into the workspace, for convenience
+	gopath := w.gopath(guessGoCommand(args) != "get")
 	os.Setenv("GOPATH", gopath)
 	log.Printf("using GOPATH=%s", gopath)
 	shellOutToGo(args)
