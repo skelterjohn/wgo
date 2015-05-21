@@ -44,7 +44,7 @@ func (w *workspace) importGodeps() map[string]dirDep {
 		}
 		return nil
 	}
-	filepath.Walk(w.root, scanDir)
+	filepath.Walk(w.Root, scanDir)
 	return w.mergeGodeps(dirGs)
 }
 

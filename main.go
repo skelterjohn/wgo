@@ -114,8 +114,8 @@ func initWgo(args []string) error {
 	}
 
 	w, err := getCurrentWorkspace()
-	if err == nil && (w.root == wd && len(args) == 0) {
-		return fmt.Errorf("%q is already a workspace", w.root)
+	if err == nil && (w.Root == wd && len(args) == 0) {
+		return fmt.Errorf("%q is already a workspace", w.Root)
 	}
 
 	fi, err := os.Stat(wd)
@@ -187,7 +187,7 @@ func initWgo(args []string) error {
 		goGetDir: true,
 	}
 
-	for _, gopath := range w.gopaths {
+	for _, gopath := range w.Gopaths {
 		if _, ok := alreadyListed[gopath]; ok {
 			continue
 		}

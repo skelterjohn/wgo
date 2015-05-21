@@ -14,68 +14,26 @@ limitations under the License.
 package main
 
 import (
-	"bufio"
-	"errors"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
+
+	"github.com/skelterjohn/wgo/workspaces"
 )
 
 type workspace struct {
-	root    string
-	gopaths []string
+	workspaces.Workspace
 }
 
 func getCurrentWorkspace() (*workspace, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	return getWorkspace(wd)
+	w, err := workspaces.GetCurrentWorkspace()
+	return &workspace{*w}, err
 }
 
 func getWorkspace(start string) (*workspace, error) {
-	goCfgPath := filepath.Join(start, ConfigDirName)
-
-	if fi, err := os.Stat(goCfgPath); err == nil && fi.IsDir() {
-		w := &workspace{
-			root: start,
-		}
-		if cfgFile, err := os.Open(filepath.Join(goCfgPath, "gopaths")); err == nil {
-			sc := bufio.NewScanner(cfgFile)
-			for sc.Scan() {
-				gopath := sc.Text()
-				w.gopaths = append(w.gopaths, strings.TrimSpace(gopath))
-			}
-		}
-		return w, nil
-	}
-
-	if rune(start[len(start)-1]) == filepath.Separator {
-		start = start[:len(start)-1]
-	}
-	dir, _ := filepath.Split(start)
-	if dir == start {
-		return nil, errors.New("no workspace")
-	}
-
-	return getWorkspace(dir)
-}
-
-func (w *workspace) gopath(external bool) string {
-	var oldgopath string
-	if external {
-		oldgopath = os.Getenv("GOPATH")
-	}
-	var absGoPaths []string
-	for _, gopath := range w.gopaths {
-		absGoPaths = append(absGoPaths, filepath.Join(w.root, gopath))
-	}
-	newgopath := strings.Join(absGoPaths, string(filepath.ListSeparator))
-	newgopath = strings.Join([]string{newgopath, oldgopath}, string(filepath.ListSeparator))
-	return newgopath
+	w, err := workspaces.GetWorkspace(start)
+	return &workspace{*w}, err
 }
 
 func guessGoCommand(args []string) string {
@@ -87,7 +45,7 @@ func guessGoCommand(args []string) string {
 
 func (w *workspace) shellOutToGo(args []string) {
 	// we want to fetch new code directly into the workspace, for convenience
-	gopath := w.gopath(guessGoCommand(args) != "get")
+	gopath := w.Gopath(guessGoCommand(args) != "get")
 	os.Setenv("GOPATH", gopath)
 	log.Printf("using GOPATH=%s", gopath)
 	shellOutToGo(args)
@@ -95,8 +53,8 @@ func (w *workspace) shellOutToGo(args []string) {
 
 func (w *workspace) vendorRootSrc() string {
 	firstGopath := "."
-	if len(w.gopaths) != 0 {
-		firstGopath = w.gopaths[0]
+	if len(w.Gopaths) != 0 {
+		firstGopath = w.Gopaths[0]
 	}
 	return filepath.Join(firstGopath, "src")
 }

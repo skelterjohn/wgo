@@ -27,9 +27,9 @@ import (
 )
 
 func (w *workspace) getOutsidePackages(targets []string) map[string]string {
-	os.Setenv("GOPATH", w.gopath(true))
+	os.Setenv("GOPATH", w.Gopath(true))
 
-	for _, gopath := range w.gopaths {
+	for _, gopath := range w.Gopaths {
 		target := "./" + gopath + "/src/..." // filepath.Join() doesn't like a leading dot.
 		targets = append(targets, target)
 	}
@@ -39,7 +39,7 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	// fmt.Printf("%q\n", goListTestArgs)
 	var testBuf bytes.Buffer
 	cmd := exec.Command("go", goListTestArgs...)
-	cmd.Dir = w.root
+	cmd.Dir = w.Root
 	cmd.Stdout = &testBuf
 	orExit(cmd.Run())
 	for _, pkg := range strings.Split(testBuf.String(), "\n") {
@@ -51,19 +51,19 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	// fmt.Printf("%q\n", goListArgs)
 	var buf bytes.Buffer
 	cmd = exec.Command("go", goListArgs...)
-	cmd.Dir = w.root
+	cmd.Dir = w.Root
 	cmd.Stdout = &buf
 	orExit(cmd.Run())
 
 	goroot := runtime.GOROOT()
-	build.Default.GOPATH = w.gopath(true)
+	build.Default.GOPATH = w.Gopath(true)
 
 	pkgs := map[string]string{}
 	for _, pkg := range strings.Split(buf.String(), "\n") {
 		if pkg == "" {
 			continue
 		}
-		p, err := build.Import(pkg, w.root, build.FindOnly)
+		p, err := build.Import(pkg, w.Root, build.FindOnly)
 		if err != nil {
 			continue
 		}
@@ -77,7 +77,7 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 		if !filepath.IsAbs(dir) {
 			continue
 		}
-		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
+		if x, err := filepath.Rel(w.Root, dir); err == nil && !strings.HasPrefix(x, "..") {
 			continue
 		}
 		pkgs[pkg] = dir
@@ -107,7 +107,7 @@ func save(w *workspace, args []string) {
 		if !filepath.IsAbs(dir) {
 			continue
 		}
-		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
+		if x, err := filepath.Rel(w.Root, dir); err == nil && !strings.HasPrefix(x, "..") {
 			continue
 		}
 		addonMapping[destination] = dir
@@ -134,7 +134,7 @@ func save(w *workspace, args []string) {
 	}
 
 	ignoreDirs := []string{".git", ".hg", ".gocfg"}
-	for _, gopath := range w.gopaths {
+	for _, gopath := range w.Gopaths {
 		ignoreDirs = append(ignoreDirs,
 			filepath.Join(gopath, "pkg"),
 			filepath.Join(gopath, "bin"))
@@ -144,17 +144,17 @@ func save(w *workspace, args []string) {
 		ignored[dir] = true
 	}
 
-	cfgPath := filepath.Join(w.root, ConfigDirName, "vendor.json")
+	cfgPath := filepath.Join(w.Root, ConfigDirName, "vendor.json")
 
-	vend.Save(w.root, cfgPath, addons, rgits, rhgs, ignored, true)
+	vend.Save(w.Root, cfgPath, addons, rgits, rhgs, ignored, true)
 }
 
 func vendor(w *workspace, targets []string) {
 	pkgs := w.getOutsidePackages(targets)
 
 	firstGopath := "."
-	if len(w.gopaths) != 0 {
-		firstGopath = w.gopaths[0]
+	if len(w.Gopaths) != 0 {
+		firstGopath = w.Gopaths[0]
 	}
 
 	for pkg, dir := range pkgs {
@@ -163,7 +163,7 @@ func vendor(w *workspace, targets []string) {
 		if !filepath.IsAbs(dir) {
 			continue
 		}
-		if x, err := filepath.Rel(w.root, dir); err == nil && !strings.HasPrefix(x, "..") {
+		if x, err := filepath.Rel(w.Root, dir); err == nil && !strings.HasPrefix(x, "..") {
 			continue
 		}
 		if _, err := os.Stat(destination); err == nil {
@@ -175,7 +175,7 @@ func vendor(w *workspace, targets []string) {
 }
 
 func restore(w *workspace) {
-	cfgPath := filepath.Join(w.root, ConfigDirName, "vendor.json")
+	cfgPath := filepath.Join(w.Root, ConfigDirName, "vendor.json")
 
-	vend.Restore(w.root, cfgPath)
+	vend.Restore(w.Root, cfgPath)
 }
