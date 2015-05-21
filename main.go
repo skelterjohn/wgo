@@ -38,7 +38,7 @@ const getFlag = "--vendor-gopath"
 var usageMessage = fmt.Sprintf(`wgo is a tool for managing Go workspaces.
 
 usage: wgo init [%s=VENDOR_GOPATH] [ADDITIONAL_GOPATH+]
-       wgo import
+       wgo restore
        wgo save [--godeps] [PACKAGE+]
        wgo vendor [PACKAGE+]
 
