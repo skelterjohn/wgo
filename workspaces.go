@@ -27,13 +27,19 @@ type workspace struct {
 }
 
 func getCurrentWorkspace() (*workspace, error) {
-	w, err := workspaces.GetCurrentWorkspace()
-	return &workspace{*w}, err
+	if w, err := workspaces.GetCurrentWorkspace(); err != nil {
+		return nil, err
+	} else {
+		return &workspace{*w}, nil
+	}
 }
 
 func getWorkspace(start string) (*workspace, error) {
-	w, err := workspaces.GetWorkspace(start)
-	return &workspace{*w}, err
+	if w, err := workspaces.GetWorkspace(start); err != nil {
+		return nil, err
+	} else {
+		return &workspace{*w}, nil
+	}
 }
 
 func guessGoCommand(args []string) string {
