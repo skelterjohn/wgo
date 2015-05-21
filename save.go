@@ -21,37 +21,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
-)
 
-func ensureVendor() {
-	var buf bytes.Buffer
-	cmd := exec.Command("vendor")
-	cmd.Stderr = &buf
-	cmd.Run()
-	if !strings.HasPrefix(buf.String(), "Usage: vendor") {
-		fmt.Fprintln(os.Stderr, "The save/restore functionality uses 'vendor'.")
-		fmt.Fprintln(os.Stderr, "To install vendor, 'go get github.com/skelterjohn/vendor'.")
-		os.Exit(1)
-	}
-	cmd = exec.Command("vendor", "-v")
-	buf = bytes.Buffer{}
-	cmd.Stdout = &buf
-	cmd.Run()
-	if !strings.HasPrefix(buf.String(), "vendor build ") {
-		fmt.Fprintln(os.Stderr, "Your copy of vendor is out of date.")
-		fmt.Fprintln(os.Stderr, "To update vendor, 'go get -u github.com/skelterjohn/vendor'.")
-		os.Exit(1)
-	}
-	tokens := strings.Split(buf.String(), " ")
-	numToken := strings.TrimSpace(tokens[2])
-	if buildNum, err := strconv.Atoi(numToken); err != nil || buildNum < 3 {
-		fmt.Fprintln(os.Stderr, "Your copy of vendor is out of date.")
-		fmt.Fprintln(os.Stderr, "To update vendor, 'go get -u github.com/skelterjohn/vendor'.")
-		os.Exit(1)
-	}
-}
+	"github.com/skelterjohn/vendor/vend"
+)
 
 func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 	os.Setenv("GOPATH", w.gopath(true))
@@ -114,7 +87,6 @@ func (w *workspace) getOutsidePackages(targets []string) map[string]string {
 }
 
 func save(w *workspace, args []string) {
-	ensureVendor()
 
 	var targets []string
 	godeps := false
@@ -141,15 +113,23 @@ func save(w *workspace, args []string) {
 		addonMapping[destination] = dir
 	}
 
-	var addonArgs []string
+	var addons []string
 	for destination, dir := range addonMapping {
-		addonArgs = append(addonArgs, "-a", destination+"="+dir)
+		addons = append(addons, destination+"="+dir)
 	}
 
+	var rgits, rhgs []string
 	if godeps {
 		for _, dd := range w.importGodeps() {
 			rarg := dd.root + "=" + dd.repo + "@" + dd.rev
-			addonArgs = append(addonArgs, "-r"+dd.kind, rarg)
+			switch dd.kind {
+			case "git":
+				rgits = append(rgits, rarg)
+			case "hg":
+				rhgs = append(rhgs, rarg)
+			default:
+				fmt.Fprintf(os.Stderr, "unsupported VCS %q\n", dd.kind)
+			}
 		}
 	}
 
@@ -159,11 +139,14 @@ func save(w *workspace, args []string) {
 			filepath.Join(gopath, "pkg"),
 			filepath.Join(gopath, "bin"))
 	}
-	ignoreDirsStr := strings.Join(ignoreDirs, string(filepath.ListSeparator))
-	os.Setenv("VENDOR_IGNORE_DIRS", ignoreDirsStr)
+	ignored := map[string]bool{}
+	for _, dir := range ignoreDirs {
+		ignored[dir] = true
+	}
 
-	w.shellOutToVendor(
-		append([]string{"wgo", "vendor", "-x", "-s"}, addonArgs...))
+	cfgPath := filepath.Join(w.root, ConfigDirName, "vendor.json")
+
+	vend.Save(w.root, cfgPath, addons, rgits, rhgs, ignored, true)
 }
 
 func vendor(w *workspace, targets []string) {
@@ -192,7 +175,7 @@ func vendor(w *workspace, targets []string) {
 }
 
 func restore(w *workspace) {
-	ensureVendor()
+	cfgPath := filepath.Join(w.root, ConfigDirName, "vendor.json")
 
-	w.shellOutToVendor([]string{"wgo", "vendor", "-r"})
+	vend.Restore(w.root, cfgPath)
 }

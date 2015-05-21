@@ -113,20 +113,3 @@ func shellOutToGo(args []string) {
 	}
 	os.Exit(0)
 }
-
-func (w *workspace) shellOutToVendor(args []string) {
-	vendorJson := filepath.Join(w.root, ConfigDirName, "vendor.json")
-	vendorArgs := append(args[2:], vendorJson)
-
-	log.Printf("forking to vendor: %q", vendorArgs)
-	cmd := exec.Command("vendor", vendorArgs...)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Dir = w.root
-	err := cmd.Run()
-	if _, ok := err.(*exec.ExitError); ok {
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
