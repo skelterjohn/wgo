@@ -95,8 +95,11 @@ func main() {
 		save(w, os.Args[2:])
 	default:
 		w, err := getCurrentWorkspace()
-		orExit(err)
-		w.shellOutToGo(os.Args)
+		if err == nil {
+			w.shellOutToGo(os.Args)
+		} else {
+			shellOutToGo(os.Args)
+		}
 	}
 }
 
