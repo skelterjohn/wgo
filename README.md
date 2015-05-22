@@ -104,6 +104,12 @@ So, if "W/.gocfg" exists, running wgo from within that workspace is the same as 
 
 You can modify "W/.gocfg/gopaths" at any time to change the GOPATH priority. For instance, if you put third party dependencies in "W/vendor/src", and you want calls to `go get` to put new source in there, make sure "W/vendor" is the first line in "W/.gocfg/gopaths" (this is the default when you run `wgo init` with no additional arguments).
 
+####wgo-exec####
+
+If you install "github.com/skelterjohn/wgo/wgo-exec", the wgo-exec tool can be used to run arbitrary commands with GOPATH adjusted for the workspace. In a bash shell, running `wgo-exec foo bar` is equivalent to `GOPATH=$(wgo env GOPATH) foo bar`.
+
+The wgo-exec tool can be useful for situations where it is easier to change the command run than to change the environment for a command.
+
 ####.gocfg/vendor.json####
 
 The ".gocfg/vendor.json" file maps import paths to repository revisions. It is written and used by the "github.com/skelterjohn/vendor/vend" package. The `vendor` tool can also make use if it, and can be installed by running `go get github.com/skelterjohn/vendor`.
