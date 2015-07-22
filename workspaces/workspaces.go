@@ -78,7 +78,9 @@ func (w *Workspace) Gopath(external bool) string {
 		absGoPaths = append(absGoPaths, filepath.Join(w.Root, gopath))
 	}
 	newgopath := strings.Join(absGoPaths, string(filepath.ListSeparator))
-	newgopath = strings.Join([]string{newgopath, oldgopath}, string(filepath.ListSeparator))
+	if oldgopath != "" {
+		newgopath = strings.Join([]string{newgopath, oldgopath}, string(filepath.ListSeparator))
+	}
 	return newgopath
 }
 
