@@ -23,7 +23,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/skelterjohn/vendor/vend"
+	"github.com/skelterjohn/vfu/vend"
 )
 
 func (w *workspace) getOutsidePackages(targets []string) map[string]string {
