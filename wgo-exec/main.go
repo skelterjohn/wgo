@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"github.com/skelterjohn/wgo/workspaces"
 )
@@ -38,7 +40,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	os.Setenv("GOPATH", w.Gopath(true))
+	path := os.Getenv("PATH")
+	gopath := w.Gopath(true)
+	sep := string(os.PathListSeparator)
+	for _, p := range strings.Split(gopath, sep) {
+		path = filepath.Join(p, "bin") + sep + path
+	}
+
+	os.Setenv("GOPATH", gopath)
+	os.Setenv("PATH", path)
 	cmd := exec.Command(os.Args[1], os.Args[2:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
