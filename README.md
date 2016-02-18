@@ -32,7 +32,7 @@ The approach used by wgo is to go *on top* of the go tool (and `go get`). It man
 
 As a result, github repositories that are made to work with `go get` do not work as wgo workspaces. This incongruency is intentional: `go get` fetches a single piece of your project, while wgo manages the whole thing.
 
-The wgo tool also uses a Go-agnostic tool, vendor (github.com/skelterjohn/vendor), to manage versions of dependencies. There is no reason to restrict vendoring goodness to Go projects.
+The wgo tool also uses a Go-agnostic tool, vendor (github.com/skelterjohn/vfu), to manage versions of dependencies. There is no reason to restrict vendoring goodness to Go projects.
 
 ####Typical use####
 
@@ -112,7 +112,7 @@ The wgo-exec tool can be useful for situations where it is easier to change the 
 
 ####.gocfg/vendor.json####
 
-The ".gocfg/vendor.json" file maps import paths to repository revisions. It is written and used by the "github.com/skelterjohn/vendor/vend" package. The `vendor` tool can also make use if it, and can be installed by running `go get github.com/skelterjohn/vendor`.
+The ".gocfg/vendor.json" file maps import paths to repository revisions. It is written and used by the "github.com/skelterjohn/vfu/vend" package. The `vendor` tool can also make use if it, and can be installed by running `go get github.com/skelterjohn/vfu`.
 
 ##New commands##
 
