@@ -207,7 +207,3 @@ func initWgo(args []string) error {
 
 	return nil
 }
-
-func clone(args []string) error {
-	return nil
-}
