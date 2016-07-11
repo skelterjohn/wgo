@@ -41,6 +41,7 @@ usage: wgo init [%s=VENDOR_GOPATH] [ADDITIONAL_GOPATH+]
        wgo restore
        wgo save [--godeps] [PACKAGE+]
        wgo vendor [PACKAGE+]
+       wgo purge [GOPATH+]
 
        wgo <go command>  # run a go command with the workspace's gopaths
 `, getFlag)
@@ -89,6 +90,10 @@ func main() {
 		w, err := getCurrentWorkspace()
 		orExit(err)
 		restore(w)
+	case "purge":
+		w, err := getCurrentWorkspace()
+		orExit(err)
+		purge(w, os.Args[2:])
 	case "save":
 		w, err := getCurrentWorkspace()
 		orExit(err)
@@ -205,9 +210,5 @@ func initWgo(args []string) error {
 		fmt.Fprintln(fout, gopath)
 	}
 
-	return nil
-}
-
-func clone(args []string) error {
 	return nil
 }

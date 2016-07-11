@@ -148,3 +148,6 @@ The restore subcommand will update all repositories in "W/src" to the revision n
 
 ###wgo vendor###
 The vendor subcommand will find all Go dependencies that are outside of the workspace and copy them into the workspace. Useful if you intend to completely vendor a workspace.
+
+###wgo purge###
+The purge subcommand lists and deletes (if you provide the `--confirm` flag) all directories that do not contain source imported by something outside of the directories being purged. By default, the first `GOPATH` is purged (and by default, that is the `vendor` dir).
