@@ -168,7 +168,7 @@ func purge(w *workspace, args []string) {
 	}
 
 	for _, d := range sortedPurge {
-		if err := os.RemoveAll(d); err != nil {
+		if err := os.RemoveAll(filepath.Join(w.Root, d)); err != nil {
 			fmt.Println("Error removing %q: %v\n", d, err)
 		}
 	}
