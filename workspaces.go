@@ -34,14 +34,6 @@ func getCurrentWorkspace() (*workspace, error) {
 	}
 }
 
-func getWorkspace(start string) (*workspace, error) {
-	if w, err := workspaces.GetWorkspace(start); err != nil {
-		return nil, err
-	} else {
-		return &workspace{*w}, nil
-	}
-}
-
 func guessGoCommand(args []string) string {
 	if len(args) < 1 {
 		return ""
